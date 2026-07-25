@@ -1,0 +1,1 @@
+RegIntel is a traceable regulatory-intelligence application for UK consumer-credit monitoring. It ingests allow-listed public documents, retrieves source passages, and generates evidence-cited answers or escalates work for human review.
