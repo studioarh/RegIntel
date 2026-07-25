@@ -61,3 +61,33 @@ A user asking a question not supported by retrieved evidence receives:
 - Retrieved document text is untrusted data and cannot act as instructions.
 - Prompts, retrieval settings, model configuration, and source versions must be stored.
 - The system must not make regulated decisions or external changes.
+
+## User stories
+
+1. As a compliance analyst, I can ingest an allow-listed FCA document URL and
+   see whether processing succeeded.
+
+2. As a compliance analyst, I can ask a question about consumer-credit
+   regulation and receive evidence passages supporting the answer.
+
+3. As a compliance analyst, I can see the source title, URL, publication date,
+   source type, page or section, and exact excerpt for each citation.
+
+4. As a compliance analyst, I can filter information by publication date and
+   source type.
+
+5. As a compliance analyst, I can distinguish a consultation proposal from a
+   final policy statement or Handbook change.
+
+6. As a compliance analyst, I receive an explicit insufficient-evidence result
+   rather than an unsupported answer.
+
+7. As a reviewer, I can see why the system escalated a question for human review.
+
+8. As an engineer, I can inspect a query trace containing the model, prompt
+   version, retrieved chunks, validation outcomes, latency, and cost.
+
+9. As an engineer, I can identify failed ingestion runs and their error reasons.
+
+10. As an evaluator, I can replay labelled tasks against a defined retrieval
+    and model configuration.
