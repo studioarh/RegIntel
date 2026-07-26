@@ -31,4 +31,4 @@ jobs:
         run: mypy app
 
       - name: Test
-        run: pytest tests/unit
+        run: python -m pytest tests/unit -v
