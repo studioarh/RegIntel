@@ -1,6 +1,8 @@
+from uuid import UUID, uuid4
+
 from fastapi import FastAPI, Response, status
 from pydantic import BaseModel, AnyHttpUrl
-from uuid import UUID, uuid4
+
 app = FastAPI(
     title="RegIntel API",
     version="0.1.0",
@@ -25,7 +27,14 @@ def healthcheck() -> HealthResponse:
 @app.post("/v1/documents/ingest")
 def UrlStatus(url: AnyHttpUrl, response: Response) -> IngestionUrlResponse:
 
-    allowed_hosts={'fca.org.uk', 'register.fca.org.uk','handbook.fca.org.uk','www.fca.org.uk', 'www.register.fca.org.uk','www.handbook.fca.org.uk'}
+    allowed_hosts={
+        'fca.org.uk', 
+        'register.fca.org.uk',
+        'handbook.fca.org.uk',
+        'www.fca.org.uk', 
+        'www.register.fca.org.uk',
+        'www.handbook.fca.org.uk'
+        }
 
     if url.host not in allowed_hosts:
         response.status_code=status.HTTP_400_BAD_REQUEST
