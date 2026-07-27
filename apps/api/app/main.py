@@ -1,7 +1,7 @@
 from uuid import UUID, uuid4
 
 from fastapi import FastAPI, Response, status
-from pydantic import BaseModel, AnyHttpUrl
+from pydantic import AnyHttpUrl, BaseModel
 
 app = FastAPI(
     title="RegIntel API",
