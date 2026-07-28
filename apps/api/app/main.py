@@ -44,6 +44,9 @@ def UrlStatus(url: AnyHttpUrl, response: Response) -> IngestionUrlResponse:
     response.status_code=status.HTTP_202_ACCEPTED
 
     return IngestionUrlResponse(ingestion_id=uuid4(), status="Queued")
+
+
+@app.get("/v1/ingestion-runs/{run_id}")
     
         
     

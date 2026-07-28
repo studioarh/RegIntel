@@ -1,7 +1,8 @@
-from fastapi.testclient import TestClient
 from fastapi import status
+from fastapi.testclient import TestClient
 
 from apps.api.app.main import app
+
 
 def test_ingest_accepts_valid_fca_url() -> None:
     client = TestClient(app)
