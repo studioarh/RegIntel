@@ -1,5 +1,5 @@
 import enum
-import uuid, uuid4
+import uuid
 from apps.db.session import Base
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
@@ -13,9 +13,9 @@ class IngestionStatus(str, enum.Enum):
     FAILED = "failed"
 
 class IngestionRun(Base):
-    __tablename__ = "ingestion_runs"
+    __tablename__ = "ingestion_runs3"
 
-    id: Mapped[uuid.UUID] = mapped_column(
+    ingestion_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
              primary_key=True,
              default=uuid.uuid4
@@ -34,3 +34,15 @@ class IngestionRun(Base):
         nullable=False,
         server_default=func.now()
     )
+
+    started_at: Mapped[datetime] = mapped_column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now()
+        )
+
+    completed_at: Mapped[datetime] = mapped_column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now()
+        )

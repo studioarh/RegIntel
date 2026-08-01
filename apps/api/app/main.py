@@ -1,6 +1,7 @@
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+from apps.api.app.services.ingestion import router
 
 app = FastAPI(
     title="RegIntel API",
@@ -8,7 +9,7 @@ app = FastAPI(
     description="Traceable regulatory intelligence for UK consumer-credit firms.",
 )
 
-
+app.include_router(router)
 class HealthResponse(BaseModel):
     status: str
 

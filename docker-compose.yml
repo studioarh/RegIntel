@@ -3,20 +3,25 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    command: uvicorn apps.api.app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
-    volumes:
-      - ./apps/api:/app
     environment:
-      ENVIRONMENT: development
+      - ENVIRONMENT=development
+      - PYTHONPATH=/app
+    env_file:
+      - .env
+    depends_on:
+      - postgres
 
   postgres:
     image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_DB: regintel
-      POSTGRES_USER: regintel
-      POSTGRES_PASSWORD: change-me
+      POSTGRES_DB: mydb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:
