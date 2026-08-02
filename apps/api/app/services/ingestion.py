@@ -15,7 +15,7 @@ class IngestRequest(BaseModel):
 
 class IngestionUrlResponse(BaseModel):
      ingestion_id: UUID
-     source_url: str
+     document_url: str
      status: str
      created_at: datetime
      started_at: datetime | None
@@ -91,7 +91,7 @@ def create_ingestion_run(
 
     response.status_code=status.HTTP_202_ACCEPTED
 
-    run = IngestionRun(source_url=str(payload.url))
+    run = IngestionRun(document_url=str(payload.url))
 
     db.add(run)
     db.commit()
@@ -122,7 +122,7 @@ def get_ingestion_run(
 
     return IngestionUrlResponse(
         ingestion_id=run.ingestion_id,
-        source_url=run.source_url,
+        document_url=run.document_url,
         status=run.status.value,
         created_at=run.created_at,
         started_at=run.started_at,
