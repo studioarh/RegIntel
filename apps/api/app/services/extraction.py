@@ -116,7 +116,56 @@ def extract_html(raw_content: bytes,
      
      html = raw_content.decode("utf-8", errors="replace")
      soup = BeautifulSoup(html, "html.parser")
-     
+
+     for tag in soup(["script", "style", "noscript", "template", "svg", "iframe"]):
+          tag.decompose()
+
+     title_tag = soup.find("meta", property="og:title")
+
+     title = title_tag.get("content", "").strip() if title_tag else None
+
+     if not title:
+          page_title = soup.find("title")
+          title = page_title.get_text(" ", strip=True) if page_title else None
+
+     published_meta = (
+          soup.find("meta", property="article:published_time")
+          or soup.find("meta", attrs={"name" : "date"})
+          or soup.find("meta", attrs={"name" : "DC.date"}) 
+     )
+
+     published_value = (
+          published_meta.get("content") if published_meta else None
+     )
+
+     parts: list[str] = []
+
+     for element in soup(
+          ["h1", "h2", "h3", "h4", "h5", "h6", "p", "li", "blockquote", "pre"]
+          ):
+
+          value = element.get_text(" ", strip=True)
+
+          if not value:
+               continue
+
+          if element.name.startswith("h"):
+               level = int(element.name[1])
+               parts.append(f"{'#' * level} {value}")
+          else:
+               parts.append(value)
+
+     text = require_meaningful_text("\n\n".join(parts))
+
+
+     return ExtractedDocument(
+        title=title or None,
+        text=text,
+        published_at=parse_published_at(published_value),
+        source_url=source_url,
+        content_type=content_type,
+        pages=None,
+    )
     
 
     
