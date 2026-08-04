@@ -7,6 +7,7 @@ import re
 import hashlib
 
 from bs4 import BeautifulSoup
+import fitz
 
 
 MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024
@@ -166,7 +167,87 @@ def extract_html(raw_content: bytes,
         content_type=content_type,
         pages=None,
     )
-    
+
+def extract_pdf(
+          raw_content: bytes, 
+          source_url: str,
+          content_type: str,
+          ) -> ExtractedDocument:
+
+          try:
+               pdf = fitz.open(stream=raw_content, filetype="pdf")
+          except Exception as exc:
+               raise ExtractionError("The PDF could not be opened.") from exc
+
+          try:
+               pages = [
+                    normalize_text(page.get_text("text", sort=True)) for page in pdf
+                    ]
+
+               pages = [page for page in pages if page]
+          finally:
+               pdf.close()
+
+
+          text = require_meaningful_text(
+               "\n\n".join(
+                    f"--- Page {index} ---\n{page_text}" for index, page_text in enumerate(pages, start=1)
+               )
+               )
+          
+          return ExtractedDocument(
+               title=None,
+               text=text,
+               published_at=None,
+               source_url=source_url,
+               content_type=content_type,
+               pages=pages,
+               )
+
+def extract_plain_text(
+          raw_content: bytes,
+          source_url: str,
+          content_type: str
+          ) -> ExtractedDocument:
+
+     text = require_meaningful_text(
+          raw_content.decode("utf-8", errors="replace")
+          )
+
+     return ExtractedDocument(
+        title=None,
+        text=text,
+        published_at=None,
+        source_url=source_url,
+        content_type=content_type,
+        pages=None,
+    )
+
+
+def extract_document(
+          raw_content: bytes,
+          source_url: str,
+          content_type: str
+) -> ExtractedDocument:
+
+     """
+    Dispatch based on the HTTP Content-Type header.
+    Removes header parameters such as '; charset=utf-8'.
+    """  
+     media_type = content_type.split(";", 1)[0].strip().lower()
+
+     if media_type in {"text/html", "application/xhtml+xml"}:
+        return extract_html(raw_content, source_url, media_type)
+
+     if media_type == "application/pdf":
+        return extract_pdf(raw_content, source_url, media_type)
+
+     if media_type == "text/plain":
+        return extract_plain_text(raw_content, source_url, media_type)
+
+     raise ExtractionError(
+        f"Unsupported content type: {media_type or 'missing Content-Type'}."
+    )
 
     
 
