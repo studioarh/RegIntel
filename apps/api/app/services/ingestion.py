@@ -1,4 +1,5 @@
 from uuid import UUID
+import httpx
 from datetime import datetime, timezone
 from pydantic import AnyHttpUrl, BaseModel
 from fastapi import Depends, Response, status, APIRouter, HTTPException
@@ -7,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from apps.db.models import IngestionRun, IngestionStatus
 from apps.db.session import SessionLocal
+from extraction import download_document, extract_document, content_hash, ExtractionError
 
 router = APIRouter()
 class IngestRequest(BaseModel):
@@ -50,19 +52,41 @@ def process_ingestion_run(db: Session, run_id: UUID ):
         run.started_at = datetime.now(timezone.utc)
         db.commit()
 
+        raw_content, final_url, content_type = download_document(run.document_url)
+
+        extracted = extract_document(
+            raw_content=raw_content,
+            source_url=final_url,
+            content_type=content_type
+        )
+
+        digest = content_hash(extracted.text)
+
         run.status = IngestionStatus.COMPLETED
         run.completed_at = datetime.now(timezone.utc)
         db.commit()
 
-    except Exception:
+    except ExtractionError as exc:
         db.rollback()
 
         run = db.get(IngestionRun, run_id)
         run.status = IngestionStatus.FAILED
         run.created_at = datetime.now(timezone.utc)
+        run.error_code = "EXTRACTION_FAILED"
+        run.error_message = str(ExtractionError)
         db.commit()
 
-        raise
+    except httpx.HTTPError:
+            db.rollback()
+    
+            run = db.get(IngestionRun, run_id)
+            run.status = IngestionStatus.FAILED
+            run.created_at = datetime.now(timezone.utc)
+            run.error_code = "DOWNLOAD_FAILED"
+            run.error_message = "The source document could not be downloaded."
+            db.commit()
+
+        
 
 
 
