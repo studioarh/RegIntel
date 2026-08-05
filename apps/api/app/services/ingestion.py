@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from apps.db.models import IngestionRun, IngestionStatus
 from apps.db.session import SessionLocal
 from extraction import download_document, extract_document, content_hash, ExtractionError
+from storage import save_raw_content
 
 router = APIRouter()
 class IngestRequest(BaseModel):
@@ -60,6 +61,12 @@ def process_ingestion_run(db: Session, run_id: UUID ):
             content_type=content_type
         )
 
+        raw_storage_path = save_raw_content(
+            run_id,
+            raw_content,
+            content_type
+            )
+
         digest = content_hash(extracted.text)
 
         run.status = IngestionStatus.COMPLETED
@@ -73,7 +80,7 @@ def process_ingestion_run(db: Session, run_id: UUID ):
         run.status = IngestionStatus.FAILED
         run.created_at = datetime.now(timezone.utc)
         run.error_code = "EXTRACTION_FAILED"
-        run.error_message = str(ExtractionError)
+        run.error_message = str(exc)
         db.commit()
 
     except httpx.HTTPError:
