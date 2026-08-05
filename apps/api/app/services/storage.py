@@ -1,5 +1,5 @@
 from pathlib import Path
-import UUID
+from uuid import UUID
 
 ROOT_STORAGE_PATH = Path("data/raw")
 

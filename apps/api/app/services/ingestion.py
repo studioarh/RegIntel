@@ -1,15 +1,19 @@
-from uuid import UUID
-import httpx
 from datetime import datetime, timezone
-from pydantic import AnyHttpUrl, BaseModel
-from fastapi import Depends, Response, status, APIRouter, HTTPException
-from sqlalchemy.orm import Session
+from uuid import UUID
 
-
-from apps.db.models import IngestionRun, IngestionStatus
+import httpx
+from apps.api.app.services.extraction import (
+    ExtractionError,
+    content_hash,
+    download_document,
+    extract_document,
+)
+from apps.api.app.services.storage import save_raw_content
+from apps.db.models import Document, IngestionRun, IngestionStatus
 from apps.db.session import SessionLocal
-from extraction import download_document, extract_document, content_hash, ExtractionError
-from storage import save_raw_content
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from pydantic import AnyHttpUrl, BaseModel
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 class IngestRequest(BaseModel):
@@ -17,12 +21,12 @@ class IngestRequest(BaseModel):
 
 
 class IngestionUrlResponse(BaseModel):
-     ingestion_id: UUID
-     document_url: str
+     ingestion_id: UUID | None = None
+     document_url: str | None = None
      status: str
-     created_at: datetime
-     started_at: datetime | None
-     completed_at: datetime | None
+     created_at: datetime  | None = None
+     started_at: datetime | None = None
+     completed_at: datetime | None = None
     
         
     
@@ -67,10 +71,25 @@ def process_ingestion_run(db: Session, run_id: UUID ):
             content_type
             )
 
-        digest = content_hash(extracted.text)
+        
+
+        document = Document(
+            canonical_url=extracted.source_url,
+            source_type=extracted.content_type,
+            content_hash=content_hash(extracted.text),
+            raw_storage_path=raw_storage_path,
+            title=extracted.title,
+            published_at=extracted.published_at,
+            cleaned_text=extracted.text,
+            sector=None,
+        )
+
+        db.add(document)
 
         run.status = IngestionStatus.COMPLETED
         run.completed_at = datetime.now(timezone.utc)
+        run.document = document
+        
         db.commit()
 
     except ExtractionError as exc:

@@ -16,5 +16,6 @@ venv/
 node_modules/
 dist/
 build/
+data/
 
 .DS_Store
