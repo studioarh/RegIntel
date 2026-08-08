@@ -8,12 +8,16 @@ from apps.api.app.services.extraction import (
     download_document,
     extract_document,
 )
+
 from apps.api.app.services.storage import save_raw_content
-from apps.db.models import Document, IngestionRun, IngestionStatus
+from apps.db.models import Document, IngestionRun, IngestionStatus, DocumentChunk
 from apps.db.session import SessionLocal
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import AnyHttpUrl, BaseModel
 from sqlalchemy.orm import Session
+from chunking import draft_chunk_records
+
+
 
 router = APIRouter()
 class IngestRequest(BaseModel):
@@ -28,9 +32,6 @@ class IngestionUrlResponse(BaseModel):
      started_at: datetime | None = None
      completed_at: datetime | None = None
     
-        
-    
-        
 
 class IngestionRunResponse(BaseModel):
     ingestion_id: UUID
@@ -85,6 +86,26 @@ def process_ingestion_run(db: Session, run_id: UUID ):
         )
 
         db.add(document)
+        db.flush()
+
+
+        chunk_drafts = draft_chunk_records(document.cleaned_text)
+
+        if not chunk_drafts:
+            raise ValueError("The document produced no meaningful chunks.")
+
+
+        chunk_rows = [
+            DocumentChunk(
+                document_id=document.id,
+                page_number=chunk.page_no,
+                chunk_index=chunk.chunk_index,
+                text=chunk.text,
+                section_heading=
+
+            ) for chunk in chunk_drafts
+
+        ] 
 
         run.status = IngestionStatus.COMPLETED
         run.completed_at = datetime.now(timezone.utc)
@@ -111,11 +132,6 @@ def process_ingestion_run(db: Session, run_id: UUID ):
             run.error_code = "DOWNLOAD_FAILED"
             run.error_message = "The source document could not be downloaded."
             db.commit()
-
-        
-
-
-
 
 
 @router.post("/v1/documents/ingest", response_model=IngestionUrlResponse)

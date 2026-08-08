@@ -55,6 +55,7 @@ class ExtractedDocument:
     source_url: str
     content_type: str
     pages: list[str] | None
+    pdf_headings: list[tuple] | None
 
 
 def normalize_text(text: str) -> str:
@@ -185,6 +186,7 @@ def extract_pdf(
                     ]
 
                pages = [page for page in pages if page]
+               headings = [(heading, page) for _, heading, page in pdf.get_toc() if heading]
           finally:
                pdf.close()
 
@@ -194,14 +196,17 @@ def extract_pdf(
                     f"--- Page {index} ---\n{page_text}" for index, page_text in enumerate(pages, start=1)
                )
                )
+
+          
           
           return ExtractedDocument(
-               title=None,
+               title=headings[0].heading if headings else None,
                text=text,
                published_at=None,
                source_url=source_url,
                content_type=content_type,
                pages=pages,
+               pdf_headings=headings or None
                )
 
 def extract_plain_text(
