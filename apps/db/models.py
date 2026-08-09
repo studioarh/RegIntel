@@ -200,7 +200,7 @@ class DocumentChunk(Base):
 
     token_count: Mapped[int] = mapped_column(
         Integer,
-        nullable=False,
+        nullable=True,
     )
 
     section_heading: Mapped[str | None] = mapped_column(

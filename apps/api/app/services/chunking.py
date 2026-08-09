@@ -14,11 +14,14 @@ class ChunkingConfig:
     chunk_size_chars: int = 4000
     chunk_overlap_chars: int = 400
 
-
+@dataclass
 class ChunkDraft:
     page_no: int | None
     chunk_index: int
     text: str | None
+    heading: str | None
+    char_start: int
+    char_end: int
 
 
 
@@ -38,7 +41,21 @@ def get_pdf_page_number(
     return int(page_numbers[-1]) if page_numbers else None
 
 
-def get_pdf_heading():
+def get_pdf_heading(
+        page_no: int | None,
+        headings: list[tuple[str, int]] | None
+) -> str | None:
+
+    if page_no is None or not headings:
+        return None
+
+    matching_headings = [heading for heading, page in headings if page <= page_no]
+
+    if not matching_headings:
+        return None
+
+
+    return matching_headings[-1]
 
 
 
@@ -60,7 +77,10 @@ def chunk_text(text: str) -> list[Document]:
     return splitter.create_documents([text])
 
 
-def draft_chunk_records(text: str) -> list[ChunkDraft]:
+def draft_chunk_records(
+        text: str, 
+        headings: list[tuple[str, int]]
+        ) -> list[ChunkDraft]:
 
     chunks = chunk_text(text)
     chunk_drafts: list[ChunkDraft] = []
@@ -68,10 +88,20 @@ def draft_chunk_records(text: str) -> list[ChunkDraft]:
     for chunk_index, chunk in enumerate(chunks):
         char_start = chunk.metadata["start_index"]
 
+        char_end = char_start + len(chunk.page_content)
+
+        page_number = get_pdf_page_number(text, char_start)
+
+        pdf_heading = get_pdf_heading(page_number, headings)
+
+
         chunk_draft = ChunkDraft(
-            page_no=get_pdf_page_number(text, char_start),
+            page_no=page_number,
             chunk_index=chunk_index,
-            text=chunk.page_content
+            text=chunk.page_content,
+            heading=pdf_heading,
+            char_start=char_start,
+            char_end=char_end
             )
 
         chunk_drafts.append(chunk_draft)

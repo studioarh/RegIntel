@@ -15,7 +15,7 @@ from apps.db.session import SessionLocal
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import AnyHttpUrl, BaseModel
 from sqlalchemy.orm import Session
-from chunking import draft_chunk_records
+from apps.api.app.services.chunking import draft_chunk_records
 
 
 
@@ -89,7 +89,7 @@ def process_ingestion_run(db: Session, run_id: UUID ):
         db.flush()
 
 
-        chunk_drafts = draft_chunk_records(document.cleaned_text)
+        chunk_drafts = draft_chunk_records(document.cleaned_text, extracted.pdf_headings)
 
         if not chunk_drafts:
             raise ValueError("The document produced no meaningful chunks.")
@@ -101,11 +101,15 @@ def process_ingestion_run(db: Session, run_id: UUID ):
                 page_number=chunk.page_no,
                 chunk_index=chunk.chunk_index,
                 text=chunk.text,
-                section_heading=
+                section_heading=chunk.heading,
+                char_start=chunk.char_start,
+                char_end=chunk.char_end,
 
             ) for chunk in chunk_drafts
 
         ] 
+
+        db.add_all(chunk_rows)
 
         run.status = IngestionStatus.COMPLETED
         run.completed_at = datetime.now(timezone.utc)
