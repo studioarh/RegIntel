@@ -83,6 +83,17 @@ class IngestionRun(Base):
         back_populates="ingestion_runs",
     )
 
+    embedding_model: Mapped[str | None] = mapped_column(
+    String(100),
+    nullable=True,
+    )
+
+    embedding_dimensions: Mapped[int | None] = mapped_column(
+    nullable=True,
+    )
+
+    
+
 class Document(Base):
     __tablename__ = "documents"
 

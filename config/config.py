@@ -1,10 +1,19 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     DATABASE_URL: str
     ENVIRONMENT: str = "development"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    embedding_model: str
+    embedding_model_api_key: str
+    embedding_dimensions: int
+    base_url: str
+    llm: str
+    llm_api_key: str
 
-# Instantiate settings
+    class Config:
+        env_file = ".env" 
+        env_file_encoding = "utf-8"
+
+
 settings = Settings()

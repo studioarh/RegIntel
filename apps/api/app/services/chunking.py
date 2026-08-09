@@ -4,7 +4,9 @@ from uuid import UUID
 from langchain_core.documents import Document
 import re
 
-from apps.db.models import DocumentChunk
+
+from apps.api.app.services.embedding import embed_documents
+
 
 
 
@@ -16,12 +18,13 @@ class ChunkingConfig:
 
 @dataclass
 class ChunkDraft:
-    page_no: int | None
+    page_no: int | None = None
     chunk_index: int
     text: str | None
     heading: str | None
     char_start: int
     char_end: int
+    embedding: list[float] | None = None
 
 
 
@@ -84,6 +87,7 @@ def draft_chunk_records(
 
     chunks = chunk_text(text)
     chunk_drafts: list[ChunkDraft] = []
+    chunk_texts: list[str] = []
 
     for chunk_index, chunk in enumerate(chunks):
         char_start = chunk.metadata["start_index"]
@@ -105,6 +109,15 @@ def draft_chunk_records(
             )
 
         chunk_drafts.append(chunk_draft)
+        chunk_texts.append(chunk.page_content)
+
+    embeddings = embed_documents(chunk_texts)
+
+    for draft, embedding in zip(chunk_drafts, embeddings, strict=True):
+        draft.embedding = embedding
+
+
+
 
     return chunk_drafts
     

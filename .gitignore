@@ -19,3 +19,5 @@ build/
 data/
 
 .DS_Store
+
+test.py

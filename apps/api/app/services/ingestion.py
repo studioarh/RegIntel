@@ -2,22 +2,20 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 import httpx
+from apps.api.app.services.chunking import draft_chunk_records
 from apps.api.app.services.extraction import (
     ExtractionError,
     content_hash,
     download_document,
     extract_document,
 )
-
 from apps.api.app.services.storage import save_raw_content
-from apps.db.models import Document, IngestionRun, IngestionStatus, DocumentChunk
+from config.config import settings
+from apps.db.models import Document, DocumentChunk, IngestionRun, IngestionStatus
 from apps.db.session import SessionLocal
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import AnyHttpUrl, BaseModel
 from sqlalchemy.orm import Session
-from apps.api.app.services.chunking import draft_chunk_records
-
-
 
 router = APIRouter()
 class IngestRequest(BaseModel):
@@ -104,6 +102,7 @@ def process_ingestion_run(db: Session, run_id: UUID ):
                 section_heading=chunk.heading,
                 char_start=chunk.char_start,
                 char_end=chunk.char_end,
+                embedding=chunk.embedding
 
             ) for chunk in chunk_drafts
 
@@ -111,6 +110,8 @@ def process_ingestion_run(db: Session, run_id: UUID ):
 
         db.add_all(chunk_rows)
 
+        run.embedding_model = settings.embedding_model
+        run.embedding_dimensions = settings.embedding_dimensions
         run.status = IngestionStatus.COMPLETED
         run.completed_at = datetime.now(timezone.utc)
         run.document = document
