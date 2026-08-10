@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     base_url: str
     llm: str
     llm_api_key: str
+    min_credible_chunks: int
 
     class Config:
         env_file = ".env" 
