@@ -10,9 +10,9 @@ from apps.api.app.services.extraction import (
     extract_document,
 )
 from apps.api.app.services.storage import save_raw_content
-from config.config import settings
 from apps.db.models import Document, DocumentChunk, IngestionRun, IngestionStatus
 from apps.db.session import SessionLocal
+from config.config import settings
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import AnyHttpUrl, BaseModel
 from sqlalchemy.orm import Session

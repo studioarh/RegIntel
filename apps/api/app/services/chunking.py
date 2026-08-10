@@ -1,6 +1,6 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dataclasses import dataclass
-from uuid import UUID
+
 from langchain_core.documents import Document
 import re
 

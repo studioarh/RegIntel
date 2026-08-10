@@ -3,6 +3,9 @@ from apps.api.app.services.retrieval import retrieve_chunks
 from sqlalchemy.orm import Session
 from datetime import date
 from config.config import settings
+from dataclasses import dataclass
+
+
 
 
 def generate_answer(
