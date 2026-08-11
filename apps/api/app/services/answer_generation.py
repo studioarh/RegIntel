@@ -4,6 +4,9 @@ from sqlalchemy.orm import Session
 from datetime import date
 from config.config import settings
 from dataclasses import dataclass
+from pydantic import ValidationError
+from apps.schemas.answers import AnswerResponse, AnswerStatus
+from uuid import uuid4
 
 
 
@@ -13,7 +16,9 @@ def generate_answer(
     question: str,
     published_after: date | None = None,
     published_before: date | None = None,
-) -> list[dict]:
+) -> AnswerResponse:
+
+    trace_id = uuid4()
 
     answer_candidates = retrieve_chunks(
      db=db,

@@ -18,20 +18,8 @@ class AnswerRequest(BaseModel):
     published_before: date | None = None
 
 
-class CitationResponse(BaseModel):
-    chunk_id: UUID
-    document_title: str
-    canonical_url: str
-    page_number: int | None = None
-    section_heading: str | None = None
-    published_at: date | None = None
-    similarity: float
 
 
-class AnswerResponse(BaseModel):
-    answer: str
-    status: str
-    citations: list[CitationResponse]
 
 
 router = APIRouter()
