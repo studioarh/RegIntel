@@ -1,4 +1,8 @@
 from uuid import UUID
+from langchain_openai import ChatOpenAI
+from config.config import settings
+from langchain_core.messages import SystemMessage, HumanMessage
+
 
 
 def generate_answer_with_contract(
@@ -58,4 +62,26 @@ def generate_answer_with_contract(
 
     Return ONLY the JSON object, with no additional text.
     """
+
+    return call_llm(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
+
+def call_llm(system_prompt: str, user_prompt: str) -> str:
+
+        llm = ChatOpenAI(
+            base_url=settings.base_url,
+            api_key=settings.llm_api_key,
+            model=settings.llm,
+            seed=365,
+            temperature=0
+            )
     
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt)
+        ]
+
+        response = llm.invoke(messages)
+
+        return response.content

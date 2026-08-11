@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     llm: str
     llm_api_key: str
     min_credible_chunks: int
+    similarity_threshold: float
+    answer_context_count: int
+    
 
     class Config:
         env_file = ".env" 

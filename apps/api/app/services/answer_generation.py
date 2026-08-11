@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pydantic import ValidationError
 from apps.schemas.answers import AnswerResponse, AnswerStatus
 from uuid import uuid4
+from apps.api.app.services.llm import generate_answer_with_contract
+from apps.api.app.services.validation import validate_retrieval_quality
 
 
 
@@ -27,12 +29,38 @@ def generate_answer(
      published_after=published_after
      )
 
-    if len(answer_candidates) < settings.min_credible_chunks:
-        raise ValueError(
-        "Insufficient supporting material was retrieved."
+    retrieval_ok, retrieval_reason = validate_retrieval_quality(answer_candidates)
+
+    if not retrieval_ok:
+        return AnswerResponse(
+            status=AnswerStatus.INSUFFICIENT_EVIDENCE,
+            answer=None,
+            citations=[],
+            confidence="low",
+            reason=retrieval_reason,
+            trace_id=trace_id,
         )
 
-    answer_context = answer_candidates[:settings.answer_context_count]
+    context_chunks = answer_candidates[:settings.answer_context_count]
 
-    return answer_context
+    raw_llm_output = generate_answer_with_contract(
+        question=question,
+        context_chunks=context_chunks,
+        trace_id=trace_id
+    )
+
+    try:
+        answer = AnswerResponse.model_validate_json(raw_llm_output)
+
+    except ValidationError as exc:
+        return AnswerResponse(
+            status=AnswerStatus.INSUFFICIENT_EVIDENCE,
+            answer=None,
+            citations=[],
+            confidence="low",
+            reason="Model returned invalid answer schema.",
+            trace_id=trace_id,
+        )
+
+    
 
