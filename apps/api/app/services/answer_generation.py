@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from apps.schemas.answers import AnswerResponse, AnswerStatus
 from uuid import uuid4
 from apps.api.app.services.llm import generate_answer_with_contract
-from apps.api.app.services.validation import validate_retrieval_quality
+from apps.api.app.services.validation import validate_retrieval_quality, validate_answer_citations
 
 
 
@@ -61,6 +61,30 @@ def generate_answer(
             reason="Model returned invalid answer schema.",
             trace_id=trace_id,
         )
+
+    citations_ok, citations_reason = validate_answer_citations(
+        answer=answer,
+        retrieved_chunks=context_chunks
+    )
+
+    if not citations_ok:
+        return AnswerResponse(
+            status=AnswerStatus.INSUFFICIENT_EVIDENCE,
+            answer=None,
+            citations=[],
+            confidence="low",
+            reason=citations_reason,
+            trace_id=trace_id,
+        )
+
+    validated_answer = AnswerResponse(
+        **answer.model_dump(),
+        confidence="medium",
+        trace_id=trace_id,
+    )
+
+    return validated_answer
+
 
     
 
