@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from apps.api.app.services.ingestion import router
+from apps.api.app.answer import router as answer_router
 
 app = FastAPI(
     title="RegIntel API",
@@ -10,6 +11,8 @@ app = FastAPI(
 )
 
 app.include_router(router)
+app.include_router(answer_router)
+
 class HealthResponse(BaseModel):
     status: str
 

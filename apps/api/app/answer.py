@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from apps.api.app.services.ingestion import get_db
 from apps.api.app.services.answer_generation import generate_answer
+from apps.schemas.answers import AnswerResponse
 
 
 
@@ -23,6 +24,7 @@ class AnswerRequest(BaseModel):
 
 
 router = APIRouter()
+
 @router.post("/answer", response_model=AnswerResponse)
 def answer_question(
     payload: AnswerRequest, 
@@ -36,5 +38,11 @@ def answer_question(
     )
 
     return AnswerResponse(
-        answer=result
+        status=result.status,
+        answer=result.answer,
+        citations=result.citations,
+        confidence=result.confidence,
+        reason=result.reason,
+        trace_id=result.trace_id
+
     )

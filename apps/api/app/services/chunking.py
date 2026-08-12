@@ -18,12 +18,12 @@ class ChunkingConfig:
 
 @dataclass
 class ChunkDraft:
-    page_no: int | None = None
     chunk_index: int
-    text: str | None
-    heading: str | None
     char_start: int
     char_end: int
+    text: str | None
+    heading: str | None
+    page_no: int | None = None
     embedding: list[float] | None = None
 
 
@@ -100,12 +100,13 @@ def draft_chunk_records(
 
 
         chunk_draft = ChunkDraft(
-            page_no=page_number,
-            chunk_index=chunk_index,
-            text=chunk.page_content,
-            heading=pdf_heading,
+             chunk_index=chunk_index,
             char_start=char_start,
-            char_end=char_end
+            char_end=char_end,
+            page_no=page_number,
+            text=chunk.page_content,
+            heading=pdf_heading
+           
             )
 
         chunk_drafts.append(chunk_draft)

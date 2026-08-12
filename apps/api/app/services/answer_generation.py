@@ -3,7 +3,7 @@ from apps.api.app.services.retrieval import retrieve_chunks
 from sqlalchemy.orm import Session
 from datetime import date
 from config.config import settings
-from dataclasses import dataclass
+from apps.db.models import QueryCitation, QueryRun
 from pydantic import ValidationError
 from apps.schemas.answers import AnswerResponse, AnswerStatus
 from uuid import uuid4
@@ -32,6 +32,14 @@ def generate_answer(
     retrieval_ok, retrieval_reason = validate_retrieval_quality(answer_candidates)
 
     if not retrieval_ok:
+        query_run = QueryRun(
+                question=question,
+                status=AnswerStatus.INSUFFICIENT_EVIDENCE,
+                answer=None
+                )
+        db.add(query_run)
+        db.commit()
+
         return AnswerResponse(
             status=AnswerStatus.INSUFFICIENT_EVIDENCE,
             answer=None,
@@ -53,6 +61,14 @@ def generate_answer(
         answer = AnswerResponse.model_validate_json(raw_llm_output)
 
     except ValidationError as exc:
+        query_run = QueryRun(
+                        question=question,
+                        status=AnswerStatus.INSUFFICIENT_EVIDENCE,
+                        answer=None
+                    )
+        db.add(query_run)
+        db.commit()
+        
         return AnswerResponse(
             status=AnswerStatus.INSUFFICIENT_EVIDENCE,
             answer=None,
@@ -68,6 +84,14 @@ def generate_answer(
     )
 
     if not citations_ok:
+        query_run = QueryRun(
+                        question=question,
+                        status=AnswerStatus.INSUFFICIENT_EVIDENCE,
+                        answer=None
+                    )
+        db.add(query_run)
+        db.commit()
+        
         return AnswerResponse(
             status=AnswerStatus.INSUFFICIENT_EVIDENCE,
             answer=None,
@@ -82,6 +106,29 @@ def generate_answer(
         confidence="medium",
         trace_id=trace_id,
     )
+
+    query_run = QueryRun(
+        question=question,
+        status=validated_answer.status.value,
+        answer=validated_answer.answer
+        )
+    
+    db.add(query_run)
+    db.flush()
+
+    for position, citation in enumerate(
+        validated_answer.citations, start=1
+        ):
+        db.add(
+            QueryCitation(
+                query_run_id=query_run.id,
+                chunk_id=citation.chunk_id,
+                excerpt=citation.excerpt,
+                citation_order=position
+            )
+        )
+
+    db.commit()
 
     return validated_answer
 

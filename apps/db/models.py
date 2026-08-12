@@ -248,3 +248,53 @@ class DocumentChunk(Base):
     document: Mapped["Document"] = relationship(
         back_populates="chunks"
     )
+
+
+    
+
+
+class QueryRun(Base):
+    __tablename__ = "query_runs"
+
+    id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4(),
+    )
+
+    question: Mapped[str]
+    status: Mapped[str]
+    answer: Mapped[str | None]
+
+    citations: Mapped[list["QueryCitation"]] = relationship(
+        back_populates="query_run",
+        cascade="all, delete-orphan",
+    )
+
+
+class QueryCitation(Base):
+    __tablename__ = "query_citations"
+
+    id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4(),
+    )
+
+    query_run_id: Mapped[UUID] = mapped_column(
+        ForeignKey("query_runs.id"),
+        nullable=False,
+    )
+
+    chunk_id: Mapped[UUID] = mapped_column(
+        ForeignKey("document_chunks.id"),
+        nullable=False,
+    )
+
+    excerpt: Mapped[str]
+
+    citation_order: Mapped[int]
+
+    query_run: Mapped["QueryRun"] = relationship(
+        back_populates="citations",
+    )
