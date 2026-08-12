@@ -1,5 +1,7 @@
 from apps.api.app.services.retrieval import retrieve_chunks
-
+import logging 
+import re
+import json
 from sqlalchemy.orm import Session
 from datetime import date
 from config.config import settings
@@ -10,8 +12,26 @@ from uuid import uuid4
 from apps.api.app.services.llm import generate_answer_with_contract
 from apps.api.app.services.validation import validate_retrieval_quality, validate_answer_citations
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
+def extract_json(raw_output: str) -> str:
+    cleaned = raw_output.strip()
 
+    cleaned = re.sub(
+        r"^```(?:json)?\s*",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+
+    cleaned = re.sub(
+        r"\s*```$",
+        "",
+        cleaned,
+    )
+
+    return cleaned.strip()
 
 def generate_answer(
     db: Session,
@@ -58,7 +78,15 @@ def generate_answer(
     )
 
     try:
-        answer = AnswerResponse.model_validate_json(raw_llm_output)
+        cleaned_output = json.loads(extract_json(raw_llm_output))
+
+        cleaned_output["trace_id"] = str(trace_id)
+
+        answer = AnswerResponse.model_validate(
+        cleaned_output
+        )
+        
+        
 
     except ValidationError as exc:
         query_run = QueryRun(
@@ -68,6 +96,14 @@ def generate_answer(
                     )
         db.add(query_run)
         db.commit()
+
+        logger.warning(
+        "LLM answer schema validation failed. "
+        "trace_id=%s errors=%s raw_output=%r",
+        trace_id,
+        exc.errors(),
+        raw_llm_output,
+    )
         
         return AnswerResponse(
             status=AnswerStatus.INSUFFICIENT_EVIDENCE,
@@ -103,8 +139,8 @@ def generate_answer(
 
     validated_answer = AnswerResponse(
         **answer.model_dump(),
-        confidence="medium",
-        trace_id=trace_id,
+        
+        
     )
 
     query_run = QueryRun(

@@ -42,11 +42,16 @@ def generate_answer_with_contract(
         ],
         "confidence": "low" | "medium" | "high",
         "reason": string | null,
-        "trace_id": "UUID"
+        
     }
 
     - For each citation, the excerpt MUST be a verbatim substring of the corresponding chunk's text.
     - Use the provided trace_id unchanged.
+    Return one raw JSON object only.
+
+    Do not include explanation before or after the JSON.
+    Do not wrap it in Markdown fences.
+    Do not use ```json.
     
     """
 

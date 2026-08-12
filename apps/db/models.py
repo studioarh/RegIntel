@@ -259,7 +259,7 @@ class QueryRun(Base):
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
-        default=uuid.uuid4(),
+        default=uuid.uuid4,
     )
 
     question: Mapped[str]
@@ -278,7 +278,7 @@ class QueryCitation(Base):
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
-        default=uuid.uuid4(),
+        default=uuid.uuid4,
     )
 
     query_run_id: Mapped[UUID] = mapped_column(
