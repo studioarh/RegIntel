@@ -146,7 +146,7 @@ def generate_answer(
         retrieved_chunks=context_chunks
     )
 
-    """
+    
     
     
 
@@ -167,7 +167,7 @@ def generate_answer(
             reason=citations_reason,
             trace_id=trace_id,
         )
-"""
+
     validated_answer = AnswerResponse(
         **answer.model_dump(),
         )

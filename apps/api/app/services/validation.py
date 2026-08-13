@@ -1,6 +1,6 @@
 from config.config import settings
 from apps.schemas.answers import AnswerResponse, AnswerStatus
-
+from uuid import UUID
 import logging
 
 logger = logging.getLogger(__name__)
@@ -42,8 +42,10 @@ def validate_answer_citations(
         return True, None
 
     chunk_text_by_id = {
-        c["chunk_id"]: c["text"] for c in retrieved_chunks
+        UUID(str(c["chunk_id"])): c["text"] for c in retrieved_chunks
     }
+
+    
 
     for citation in answer.citations:
         chunk_text = chunk_text_by_id.get(citation.chunk_id)
