@@ -2,6 +2,10 @@ from uuid import UUID
 from langchain_openai import ChatOpenAI
 from config.config import settings
 from langchain_core.messages import SystemMessage, HumanMessage
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 
@@ -11,10 +15,17 @@ def generate_answer_with_contract(
         context_chunks: list[dict]
 ) -> str:
     evidence_blocks = []
+
+    logger.debug(
+            "---------------CONTEXT CHUNKS:--------------- %r",
+            context_chunks,
+        )
     for c in context_chunks:
         evidence_blocks.append(f"[CHUNK ID = {c["chunk_id"]}]\n{c["text"]}")
 
     evidence_text = "\n\n".join(evidence_blocks)
+
+    
 
     system_prompt = """
     

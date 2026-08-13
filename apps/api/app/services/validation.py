@@ -44,7 +44,7 @@ def validate_answer_citations(
         if chunk_text is None:
             return (
                 False,
-                f"Citation references chunk_id {citation.chunk_id}which was not part of the retrieval set."
+                f"Citation references chunk_id {citation.chunk_id} which was not part of the retrieval set."
             )
 
         if citation.excerpt not in chunk_text:

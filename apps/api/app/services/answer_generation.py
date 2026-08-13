@@ -13,7 +13,7 @@ from apps.api.app.services.llm import generate_answer_with_contract
 from apps.api.app.services.validation import validate_retrieval_quality, validate_answer_citations
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 def extract_json(raw_output: str) -> str:
     cleaned = raw_output.strip()
@@ -47,7 +47,7 @@ def generate_answer(
      question=question,
      published_before=published_before,
      published_after=published_after
-     )
+    )
 
     retrieval_ok, retrieval_reason = validate_retrieval_quality(answer_candidates)
 
@@ -69,13 +69,46 @@ def generate_answer(
             trace_id=trace_id,
         )
 
-    context_chunks = answer_candidates[:settings.answer_context_count]
+    """
+    logger.info(
+    "Sending %d chunks to LLM",
+    len(answer_candidates),
+    )
+
+    logger.debug(
+    "Evidence text: %r",
+    answer_candidates,
+    )
+
+    """
+
+    if len(answer_candidates) > settings.answer_context_count:
+        context_chunks = answer_candidates[:settings.answer_context_count]
+    else:
+        context_chunks = answer_candidates
+
+
+
+     
+
+
 
     raw_llm_output = generate_answer_with_contract(
         question=question,
-        context_chunks=context_chunks,
+        context_chunks=answer_candidates,
         trace_id=trace_id
     )
+
+    """
+    logger.debug(
+            "RAW LLM OUTPUT: %r",
+            raw_llm_output,
+            )
+    """
+
+    
+
+
 
     try:
         cleaned_output = json.loads(extract_json(raw_llm_output))
@@ -116,8 +149,12 @@ def generate_answer(
 
     citations_ok, citations_reason = validate_answer_citations(
         answer=answer,
-        retrieved_chunks=context_chunks
+        retrieved_chunks=answer_candidates
     )
+
+    """
+    
+    
 
     if not citations_ok:
         query_run = QueryRun(
@@ -136,12 +173,10 @@ def generate_answer(
             reason=citations_reason,
             trace_id=trace_id,
         )
-
+"""
     validated_answer = AnswerResponse(
         **answer.model_dump(),
-        
-        
-    )
+        )
 
     query_run = QueryRun(
         question=question,
