@@ -83,28 +83,22 @@ def generate_answer(
     """
 
     if len(answer_candidates) > settings.answer_context_count:
+
+        
         context_chunks = answer_candidates[:settings.answer_context_count]
     else:
         context_chunks = answer_candidates
 
 
-
-     
-
-
-
     raw_llm_output = generate_answer_with_contract(
         question=question,
-        context_chunks=answer_candidates,
+        context_chunks=context_chunks,
         trace_id=trace_id
     )
 
-    """
-    logger.debug(
-            "RAW LLM OUTPUT: %r",
-            raw_llm_output,
-            )
-    """
+    
+    
+   
 
     
 
@@ -149,7 +143,7 @@ def generate_answer(
 
     citations_ok, citations_reason = validate_answer_citations(
         answer=answer,
-        retrieved_chunks=answer_candidates
+        retrieved_chunks=context_chunks
     )
 
     """

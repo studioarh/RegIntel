@@ -1,6 +1,11 @@
 from config.config import settings
 from apps.schemas.answers import AnswerResponse, AnswerStatus
 
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 
 def validate_retrieval_quality(
         candidates: list[dict]
@@ -26,6 +31,7 @@ def validate_answer_citations(
         answer: AnswerResponse,
         retrieved_chunks: list[dict]
 ) -> tuple[bool, str | None]:
+    
     if answer.status == AnswerStatus.ANSWERED:
         if not answer.citations:
             return (
@@ -41,6 +47,9 @@ def validate_answer_citations(
 
     for citation in answer.citations:
         chunk_text = chunk_text_by_id.get(citation.chunk_id)
+
+        logger.debug("------------------CHUNK_TEXT---------------------: %r", chunk_text)
+
         if chunk_text is None:
             return (
                 False,
