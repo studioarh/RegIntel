@@ -45,10 +45,13 @@ def validate_answer_citations(
         UUID(str(c["chunk_id"])): c["text"] for c in retrieved_chunks
     }
 
+ 
+
     
 
     for citation in answer.citations:
         chunk_text = chunk_text_by_id.get(citation.chunk_id)
+        
 
         logger.debug("------------------CHUNK_TEXT---------------------: %r", chunk_text)
 
@@ -57,6 +60,9 @@ def validate_answer_citations(
                 False,
                 f"Citation references chunk_id {citation.chunk_id} which was not part of the retrieval set."
             )
+
+        citation.excerpt = chunk_text
+        
 
         if citation.excerpt not in chunk_text:
             return (

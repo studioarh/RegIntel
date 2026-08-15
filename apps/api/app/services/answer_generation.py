@@ -16,22 +16,33 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 def extract_json(raw_output: str) -> str:
-    cleaned = raw_output.strip()
+    logger.debug(
+        print("---------------RAW OUTPUT--------------",raw_output)
+    )
+    """cleaned = raw_output[0]['text'].strip()
+    parsed_json = json.loads(cleaned)
+    cleaned = parsed_json.get("answer")"""
+
 
     cleaned = re.sub(
         r"^```(?:json)?\s*",
         "",
-        cleaned,
+        raw_output[0]['text'].strip(),
         flags=re.IGNORECASE,
     )
 
     cleaned = re.sub(
         r"\s*```$",
         "",
-        cleaned,
+        raw_output[0]['text'].strip(),
     )
 
-    return cleaned.strip()
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        return {"status": "error", "answer": cleaned}
+
+    
 
 def generate_answer(
     db: Session,
@@ -105,7 +116,7 @@ def generate_answer(
 
 
     try:
-        cleaned_output = json.loads(extract_json(raw_llm_output))
+        cleaned_output = extract_json(raw_llm_output)
 
         cleaned_output["trace_id"] = str(trace_id)
 
@@ -147,9 +158,6 @@ def generate_answer(
     )
 
     
-    
-    
-
     if not citations_ok:
         query_run = QueryRun(
                         question=question,
@@ -171,6 +179,8 @@ def generate_answer(
     validated_answer = AnswerResponse(
         **answer.model_dump(),
         )
+
+    
 
     query_run = QueryRun(
         question=question,

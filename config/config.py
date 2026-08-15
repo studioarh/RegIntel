@@ -1,4 +1,9 @@
+from typing import Any
+
 from pydantic_settings import BaseSettings
+import json
+
+from pydantic import field_validator
 
 class Settings(BaseSettings):
     DATABASE_URL: str
@@ -14,10 +19,13 @@ class Settings(BaseSettings):
     similarity_threshold: float
     answer_context_count: int
     
+    
+    
 
     class Config:
         env_file = ".env" 
         env_file_encoding = "utf-8"
-
+        extra='ignore'
+    
 
 settings = Settings()

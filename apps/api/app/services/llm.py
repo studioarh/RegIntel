@@ -1,9 +1,7 @@
 from uuid import UUID
-from langchain_openai import ChatOpenAI
 from config.config import settings
 from langchain_core.messages import SystemMessage, HumanMessage
-
-
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 
 def generate_answer_with_contract(
@@ -87,13 +85,17 @@ def generate_answer_with_contract(
 
 def call_llm(system_prompt: str, user_prompt: str) -> str:
 
-        llm = ChatOpenAI(
-            base_url=settings.base_url,
-            api_key=settings.llm_api_key,
-            model=settings.llm,
-            seed=365,
-            temperature=0
-            )
+        
+        llm = ChatGoogleGenerativeAI(
+        model=settings.llm,
+        seed=365,
+        temperature=0,
+        google_api_key=settings.llm_api_key
+    )
+
+        
+
+        
     
         messages = [
             SystemMessage(content=system_prompt),

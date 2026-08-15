@@ -57,7 +57,7 @@ def retrieve_chunks(
                 "section_heading": chunk.section_heading,
                 "page_number": chunk.page_number,
     
-                "url": document.canonical_url,
+                "url": str(document.canonical_url),
                 "title": document.title,
                 "published_at": document.published_at,
                 "document_type": document.source_type,
