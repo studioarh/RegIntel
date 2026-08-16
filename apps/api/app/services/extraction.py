@@ -55,7 +55,7 @@ class ExtractedDocument:
     source_url: str
     content_type: str
     pages: list[str] | None
-    pdf_headings: list[tuple[str, int]] | None
+    pdf_headings: list[tuple[str, int]] | None = None
 
 
 def normalize_text(text: str) -> str:
