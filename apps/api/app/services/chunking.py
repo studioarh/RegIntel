@@ -100,7 +100,7 @@ def draft_chunk_records(
 
 
         chunk_draft = ChunkDraft(
-             chunk_index=chunk_index,
+            chunk_index=chunk_index,
             char_start=char_start,
             char_end=char_end,
             page_no=page_number,
