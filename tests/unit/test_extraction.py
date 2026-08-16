@@ -1,4 +1,4 @@
-from apps.api.app.services.extraction import extract_html,extract_pdf, ExtractionError, extract_document
+from apps.api.app.services.extraction import extract_html,extract_pdf, content_hash, ExtractionError, extract_document
 import pytest
 from pathlib import Path
 
@@ -23,6 +23,15 @@ def test_pdf_extraction_returns_meaningful_text() -> None:
 def test_empty_document_extraction_fails_safely() -> None:
     with pytest.raises(ExtractionError):
         extract_document(b"","empty_file.txt","text/plain")
+
+
+def test_identical_normalised_content_has_same_hash() -> None:
+    first_text = "The FCA   expects\nfirms to act."
+    second_text = "The FCA expects firms to act."
+
+    assert content_hash(first_text) == content_hash(second_text)
+
+
 
 
     
