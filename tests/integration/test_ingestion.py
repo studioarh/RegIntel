@@ -1,25 +1,52 @@
 import pytest
-
+from apps.db.models import (
+    Document,
+    DocumentChunk,
+    IngestionRun,
+)
 
 @pytest.mark.integration
 def test_ingest_fixed_html_persists_document_chunks_and_vectors(
     db_session,
+    client,
     fake_embed_documents,
 ) -> None:
-    result = ingest_document(
-        db=db_session,
-        source_url="https://www.fca.org.uk/test-fixture",
-        html_path="tests/fixtures/fca_example.html",
+
+    response = client.post(
+        "/v1/documents/ingest",
+        json={
+            "source_url": (
+                "https://www.fca.org.uk/publications/consultation-papers/cp26-15-reviewing-financial-promotions-rules-consumer-credit"
+            ),
+        },
     )
 
-    document = result.document
+    assert response.status_code in (200, 201, 202)
 
-    assert document.id is not None
-    assert document.content_hash is not None
+    payload = response.json()
 
-    chunks = list(document.chunks)
+    run = db_session.get(
+        IngestionRun,
+        payload["ingestion_run_id"],
+    )
 
-    assert len(chunks) > 0
+    assert run is not None
+    assert run.document_id is not None
+
+    document = db_session.get(
+        Document,
+        run.document_id,
+    )
+
+    assert document is not None
+
+    chunks = (
+        db_session.query(DocumentChunk)
+        .filter(DocumentChunk.document_id == document.id)
+        .all()
+    )
+
+    assert chunks
     assert all(chunk.text for chunk in chunks)
     assert all(chunk.embedding is not None for chunk in chunks)
     assert all(
