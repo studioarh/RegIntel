@@ -9,7 +9,7 @@ from apps.api.app.services.ingestion import get_db
 from apps.db.models import Document, DocumentChunk
 from apps.db.session import Base
 
-TEST_DATABASE_URL = os.environ["TEST_DATABASE_URL"]
+TEST_DATABASE_URL = "postgresql+psycopg://user:password@localhost:5432/regintel_test"
 
 
 test_engine = create_engine(TEST_DATABASE_URL)
@@ -89,12 +89,29 @@ def motor_finance_chunk(db_session):
         canonical_url="https://www.fca.org.uk/test-motor-finance",
         title="Motor finance fixture",
         content_hash="motor-finance-fixture-hash",
+        
+        source_type="html",
+        
+        raw_storage_path="test.pdf",
+        
+        published_at="2026-08-17",
+        cleaned_text="test",
+        sector=None,
     )
 
     chunk = DocumentChunk(
         document=document,
         text="Over 800 promotions about motor finance claims were amended or withdrawn.",
         embedding=[1.0, 0.0, 0.0] + [0.0] * 1021,
+
+        document_id=document.id,
+        page_number=2,
+        chunk_index=1,
+                        
+        section_heading="test",
+        char_start=1,
+        char_end=2,
+                        
     )
 
     db_session.add(chunk)

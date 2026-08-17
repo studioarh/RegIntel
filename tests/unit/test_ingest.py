@@ -3,30 +3,37 @@ from fastapi.testclient import TestClient
 
 from apps.api.app.main import app
 
+from apps.db.models import IngestionRun
 
-def test_ingest_accepts_valid_fca_url() -> None:
-    client = TestClient(app)
+def test_ingest_accepts_valid_fca_url(db_session, client) -> None:
+    
 
     response = client.post(
         "/v1/documents/ingest",
-        params={
+        json={
             "url": "https://www.handbook.fca.org.uk/handbook/CONC/"
             }
         )
 
     assert response.status_code == status.HTTP_202_ACCEPTED
 
-    body = response.json()
-    assert body["status"] == "Queued"
-    assert body['ingestion_id'] != None
+    payload = response.json()
+
+    assert payload["status"] == "queued"
+    assert payload["ingestion_id"]
+
+    
+    
+
+    
 
 
-def test_ingest_rejects_non_fca_url() -> None:
-    client = TestClient(app)
+def test_ingest_rejects_non_fca_url(client) -> None:
+   
 
     response=client.post(
         "/v1/documents/ingest",
-        params= {
+        json={
             "url": "https://www.apple.com"
         }
     )
@@ -39,9 +46,9 @@ def test_ingest_rejects_non_fca_url() -> None:
 
 
 def test_ingest_rejects_malformed_url() -> None:
-    client = TestClient(app)
+    client2 = TestClient(app)
 
-    response = client.post(
+    response = client2.post(
         "/v1/documents/ingest",
         params= {
             "url": "www.apple.com"

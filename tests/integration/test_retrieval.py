@@ -11,7 +11,7 @@ def test_known_question_returns_expected_chunk_in_top_k(
 ) -> None:
     monkeypatch.setattr(
         "apps.api.app.services.retrieval.embed_question",
-        lambda question: [1.0, 0.0, 0.0],
+        lambda question: [1.0, 0.0, 0.0] + [0.0] * 1021,
     )
 
     candidates = retrieve_chunks(
@@ -24,4 +24,4 @@ def test_known_question_returns_expected_chunk_in_top_k(
         for candidate in candidates
     }
 
-    assert motor_finance_chunk.id in returned_ids
+    assert str(motor_finance_chunk.id) in returned_ids

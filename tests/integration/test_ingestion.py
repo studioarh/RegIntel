@@ -15,10 +15,8 @@ def test_ingest_fixed_html_persists_document_chunks_and_vectors(
     response = client.post(
         "/v1/documents/ingest",
         json={
-            "source_url": (
-                "https://www.fca.org.uk/publications/consultation-papers/cp26-15-reviewing-financial-promotions-rules-consumer-credit"
-            ),
-        },
+            "url":"https://www.fca.org.uk/publications/consultation-papers/cp26-15-reviewing-financial-promotions-rules-consumer-credit"
+        }
     )
 
     assert response.status_code in (200, 201, 202)
@@ -27,7 +25,7 @@ def test_ingest_fixed_html_persists_document_chunks_and_vectors(
 
     run = db_session.get(
         IngestionRun,
-        payload["ingestion_run_id"],
+        payload["ingestion_id"],
     )
 
     assert run is not None
