@@ -52,18 +52,12 @@ def client(db_session):
 
 @pytest.fixture
 def db_session() -> Session:
-    connection = test_engine.connect()
-    transaction = connection.begin()
-
-    session = TestingSessionLocal(bind=connection)
+    session = TestingSessionLocal()
 
     try:
         yield session
     finally:
         session.close()
-        transaction.rollback()
-        connection.close()
-
 
 @pytest.fixture
 def fake_embed_documents(monkeypatch):

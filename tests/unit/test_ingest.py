@@ -5,8 +5,11 @@ from apps.api.app.main import app
 
 from apps.db.models import IngestionRun
 
-def test_ingest_accepts_valid_fca_url(db_session, client) -> None:
-    
+def test_ingest_accepts_valid_fca_url(db_session, client, monkeypatch) -> None:
+    monkeypatch.setattr(
+        "apps.api.app.services.ingestion.process_ingestion_run",
+        lambda db, run_id: None,
+    )
 
     response = client.post(
         "/v1/documents/ingest",
@@ -45,10 +48,10 @@ def test_ingest_rejects_non_fca_url(client) -> None:
     assert body['ingestion_id'] == None
 
 
-def test_ingest_rejects_malformed_url() -> None:
-    client2 = TestClient(app)
+def test_ingest_rejects_malformed_url(client) -> None:
+    
 
-    response = client2.post(
+    response = client.post(
         "/v1/documents/ingest",
         params= {
             "url": "www.apple.com"
