@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import httpx
+import hashlib
+import re
 from dataclasses import dataclass
 from datetime import date
-import re
-import hashlib
 
-from bs4 import BeautifulSoup
 import fitz
-
+import httpx
+from bs4 import BeautifulSoup
 
 MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024
 MIN_EXTRACTED_CHARACTERS = 100

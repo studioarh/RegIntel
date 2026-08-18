@@ -1,8 +1,9 @@
 
 from fastapi import FastAPI
 from pydantic import BaseModel
-from apps.api.app.services.ingestion import router
+
 from apps.api.app.answer import router as answer_router
+from apps.api.app.services.ingestion import router
 
 app = FastAPI(
     title="RegIntel API",

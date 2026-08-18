@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
-from pydantic import BaseModel, Field
 from datetime import date
-from uuid import UUID
-from sqlalchemy.orm import Session
-from apps.api.app.services.ingestion import get_db
-from apps.api.app.services.answer_generation import generate_answer
-from apps.schemas.answers import AnswerResponse
 
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from apps.api.app.services.answer_generation import generate_answer
+from apps.api.app.services.ingestion import get_db
+from apps.schemas.answers import AnswerResponse
 
 
 class AnswerRequest(BaseModel):

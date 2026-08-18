@@ -1,13 +1,9 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+import re
 from dataclasses import dataclass
 
-from langchain_core.documents import Document
-import re
-
-
 from apps.api.app.services.embedding import embed_documents
-
-
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 @dataclass(frozen=True)

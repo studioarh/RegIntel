@@ -1,6 +1,7 @@
 from uuid import UUID
+
 from config.config import settings
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 

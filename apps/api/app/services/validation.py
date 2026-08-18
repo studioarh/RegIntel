@@ -1,7 +1,8 @@
-from config.config import settings
-from apps.schemas.answers import AnswerResponse, AnswerStatus
-from uuid import UUID
 import logging
+from uuid import UUID
+
+from apps.schemas.answers import AnswerResponse, AnswerStatus
+from config.config import settings
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)

@@ -1,5 +1,4 @@
 import voyageai
-
 from config.config import settings
 
 client = voyageai.Client(api_key=settings.embedding_model_api_key)

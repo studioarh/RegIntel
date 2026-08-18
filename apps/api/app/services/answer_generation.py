@@ -1,16 +1,17 @@
-from apps.api.app.services.retrieval import retrieve_chunks
-import logging 
-import re
 import json
-from sqlalchemy.orm import Session
+import logging
+import re
 from datetime import date
-from config.config import settings
-from apps.db.models import QueryCitation, QueryRun
-from pydantic import ValidationError
-from apps.schemas.answers import AnswerResponse, AnswerStatus
 from uuid import uuid4
+
 from apps.api.app.services.llm import generate_answer_with_contract
-from apps.api.app.services.validation import validate_retrieval_quality, validate_answer_citations
+from apps.api.app.services.retrieval import retrieve_chunks
+from apps.api.app.services.validation import validate_answer_citations, validate_retrieval_quality
+from apps.db.models import QueryCitation, QueryRun
+from apps.schemas.answers import AnswerResponse, AnswerStatus
+from config.config import settings
+from pydantic import ValidationError
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
