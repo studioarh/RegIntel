@@ -2,7 +2,13 @@ from apps.db.session import Base
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Enum
+import enum
+
+class WorkflowType(str, enum.Enum):
+    REG_DOC_ANALYSIS = "regulatory_document_analysis"
+
+
 
 class WorkflowRun(Base):
     __tablename__ = "workflow_runs"
@@ -16,4 +22,15 @@ class WorkflowRun(Base):
     document_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("documents.id"),
         nullable=False
+    )
+
+    trace_id: Mapped[uuid.UUID] = mapped_column(
+            UUID(as_uuid=True),
+            default=uuid.uuid4
+        )
+
+    workflow_type: Mapped[WorkflowType] = mapped_column(
+        Enum(WorkflowType, name=""),
+        nullable=False,
+        default=WorkflowType.REG_DOC_ANALYSIS
     )
