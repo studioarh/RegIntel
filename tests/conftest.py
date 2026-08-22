@@ -1,9 +1,11 @@
-import os
+import uuid
+from datetime import date
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
+
 from apps.api.app.main import app
 from apps.api.app.services.ingestion import get_db
 from apps.db.models import Document, DocumentChunk
@@ -74,11 +76,8 @@ def fake_embed_documents(monkeypatch):
 
     return fake_embed_documents
 
-
-
-
 @pytest.fixture
-def motor_finance_chunk(db_session):
+def sample_document(db_session):
     document = Document(
         canonical_url="https://www.fca.org.uk/test-motor-finance",
         title="Motor finance fixture",
@@ -93,12 +92,19 @@ def motor_finance_chunk(db_session):
         sector=None,
     )
 
+    db_session.add(document)
+    db_session.commit()
+    db_session.refresh(document)
+    return document
+
+@pytest.fixture
+def motor_finance_chunk(db_session, sample_document):
     chunk = DocumentChunk(
-        document=document,
+        document=sample_document,
         text="Over 800 promotions about motor finance claims were amended or withdrawn.",
         embedding=[1.0, 0.0, 0.0] + [0.0] * 1021,
 
-        document_id=document.id,
+        document_id=sample_document.id,
         page_number=2,
         chunk_index=1,
                         
@@ -112,5 +118,7 @@ def motor_finance_chunk(db_session):
     db_session.commit()
 
     return chunk
+
+
 
     
