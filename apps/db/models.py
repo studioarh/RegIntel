@@ -298,3 +298,5 @@ class QueryCitation(Base):
     query_run: Mapped["QueryRun"] = relationship(
         back_populates="citations",
     )
+
+    
